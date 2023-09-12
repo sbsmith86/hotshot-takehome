@@ -9,9 +9,15 @@ const Scoreboard = require("./scoreboard");
 
 describe('Hotshot Scoreboard', () => {
     it('correctly counts all missed shots', () => {
-        const numMissedShots = Scoreboard.determineMissedShots(['green1', 'gray2', 'red2'], ['green1', 'gray2', 'blue2', 'red2']);
+        const round = {
+            'made_shots': ['green1', 'yellow1', 'gray2', 'blue1'],
+            'attempted_shots': ['green1', 'yellow1', 'gray2', 'blue1', 'red2']
+        };
 
+        const numMissedShots = Scoreboard.determineMissedShots(round.made_shots, round.attempted_shots);
         expect(numMissedShots.length).toEqual(1);
+
+        const num = Scoreboard.determineMissedShots(round.attempted_shots);
     });
 
     it('correctly maps out information about red shots made during a round. ', () => {
