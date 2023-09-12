@@ -29,7 +29,7 @@ describe('Hotshot Scoreboard', () => {
     });
 
     it('correctly creates an object with computed data about each round in a game', () => {
-        const descriptiveGame = Scoreboard.createScoreboard();
+        const descriptiveGame = Scoreboard.createScoreboard(); // Should probably mock this out
         const madeShotCountsByColorMap = new Map();
         madeShotCountsByColorMap.set('green', 1);
         madeShotCountsByColorMap.set('yellow', 1);
@@ -41,7 +41,7 @@ describe('Hotshot Scoreboard', () => {
         // console.log(roundThree);
         expect(roundThree.totalRoundShots).toEqual(9);
         expect(roundThree.madeShotCountsByColor).toEqual(madeShotCountsByColorMap);
-        expect(roundThree.madeShotScore).toEqual(23);
+        expect(roundThree.roundScore).toEqual(23);
         expect(roundThree.cumalativeScore).toEqual(44); // TO BE UPDATED
         expect(roundThree.allMissedShots.length).toEqual(0);
 
@@ -140,4 +140,63 @@ describe('Hotshot Scoreboard', () => {
 
        */
     });
+
+    it('correctly determines, if the user gets an Heatcheckround', () => {
+        expect(Scoreboard.getsHeatcheckUpgrade(50)).toBe(true);
+        expect(Scoreboard.getsHeatcheckUpgrade(15)).toBe(false);
+    });
+
+    it('calculates a round score correctly.', () => {
+        const round = {
+            'made_shots': ['green1', 'yellow1', 'blue2', 'red2'],
+            'attempted_shots': ['green1', 'yellow1', 'blue2', 'red2']
+        };
+
+        const roundScore = Scoreboard.getRoundScore(round);
+        expect(roundScore).toEqual(12);
+
+        const anotherRound = {
+            'made_shots': ['green1', 'yellow1', 'gray2', 'blue2'],
+            'attempted_shots': ['green1', 'yellow1', 'gray2', 'blue2']
+        };
+
+        const anotherRoundScore = Scoreboard.getRoundScore(anotherRound);
+
+        expect(anotherRoundScore).toEqual(14);
+    });
+
+    it('Creates correct mapping of colored spots to shot counts', () => {
+        const round = {
+            'made_shots': ['green1', 'yellow1', 'blue2', 'red2'],
+            'attempted_shots': ['green1', 'yellow1', 'blue2', 'red2']
+        };
+
+        const allowedColors = ["green", 'yellow', 'blue', 'red'];
+
+        const madeShotCountsByColor = Scoreboard.getMadeShotCounts(round);
+
+        expect(madeShotCountsByColor.size).toEqual(4);
+
+        for (let [color, shotCount] of madeShotCountsByColor) {
+            expect(allowedColors).toContain(color);
+            if (color = "blue") {
+                expect(shotCount).toEqual(1);
+            }
+        }
+    });
+
+
+    it('correcty determines if the player should get a heatcheck upgrade', () => {
+        const round =             {
+            "made_shots": ["green1", "yellow1", "gray2", "blue2","green1", "yellow1", "gray2", "blue2","green1", "yellow1", "gray2", "blue2","green1", "yellow1", "gray2", "blue2"],
+        };
+
+        const roundScore = Scoreboard.getRoundScore(round);
+        expect(roundScore).toEqual(56);
+
+        const getsUpgrade = Scoreboard.getsHeatcheckUpgrade(roundScore);
+        expect(getsUpgrade).toBe(true);
+
+    });
+
   });
