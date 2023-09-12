@@ -30,12 +30,13 @@
                 "attempted_shots": ["green1", "yellow1", "gray2", "blue1", "red1"]
             },
             {
-                "made_shots": ["green1", "yellow1", "gray2"],
-                "attempted_shots": ["green1", "yellow1", "gray2", "blue1", "red2"]
+                "made_shots": ["green1", "yellow1", "gray2", "green1","green1","green1","green1","green1"],
+                "attempted_shots": ["green1", "yellow1", "gray2", "blue1", "red2","green1","green1","green1","green1","green1"]
             },
             {
-                "made_shots": ["green1", "yellow1", "gray2", "blue2"],
-                "attempted_shots": ["green1", "yellow1", "gray2", "blue2"]
+                "made_shots": ["green1", "yellow1", "gray2", "blue2","green1", "yellow1", "gray2", "blue2","green1", "yellow1", "gray2", "blue2","green1", "yellow1", "gray2", "blue2"],
+                "attempted_shots": ["green1", "yellow1", "gray2", "blue2", "green1", "yellow1", "gray2", "blue2", "green1", "yellow1", "gray2", "blue2","green1", "yellow1", "gray2", "blue2"],
+                "made_bonus_shots": ["green1", "yellow1", "gray2"]
             },
             {
                 "made_shots": ["green1", "yellow1", "gray1", "blue2", "red2"],
