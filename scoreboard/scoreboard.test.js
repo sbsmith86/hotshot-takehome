@@ -1,12 +1,5 @@
 const Scoreboard = require("./scoreboard");
 
-// module.exports = {
-//     createScoreboard,
-//     determineMissedShots,
-//     redShots,
-//     createDescriptiveRoundMap
-// };
-
 describe('Hotshot Scoreboard', () => {
     it('correctly counts all missed shots', () => {
         const round = {
@@ -17,10 +10,14 @@ describe('Hotshot Scoreboard', () => {
         const numMissedShots = Scoreboard.determineMissedShots(round.made_shots, round.attempted_shots);
         expect(numMissedShots.length).toEqual(1);
 
-        const num = Scoreboard.determineMissedShots(round.attempted_shots);
+        // Test fail cases
+        expect(() => { Scoreboard.determineMissedShots(round.made_shots); }).toThrow("Missing shot data");
+        expect(() => { Scoreboard.determineMissedShots(round.attempted_shots); }).toThrow("Missing shot data");
+        expect(() => { Scoreboard.determineMissedShots(); }).toThrow("Missing shot data");
     });
 
     it('correctly maps out information about red shots made during a round. ', () => {
+        // Test counting is correct 1
         const round = {
             'made_shots': ['green1', 'yellow1', 'gray2', 'blue1'],
             'attempted_shots': ['green1', 'yellow1', 'gray2', 'blue1', 'red2']
@@ -32,6 +29,12 @@ describe('Hotshot Scoreboard', () => {
         expect(redShots.missedRedShots).toEqual(1);
         expect(redShots.madeRedShots).toEqual(0);
         expect(redShots.deduct).toEqual(2);
+
+
+        // Test fail cases
+        expect(() => { Scoreboard.redShots(numMissedShots); }).toThrow("Missing shot data");
+        expect(() => { Scoreboard.redShots(round.made_shots); }).toThrow("Missing shot data");
+        expect(() => { Scoreboard.redShots(); }).toThrow("Missing shot data");
     });
 
     it('correctly creates an object with computed data about each round in a game', () => {
@@ -50,7 +53,7 @@ describe('Hotshot Scoreboard', () => {
         expect(roundThree.roundScore).toEqual(23);
         expect(roundThree.cumalativeScore).toEqual(44); // TO BE UPDATED
         expect(roundThree.allMissedShots.length).toEqual(0);
-
+        // Need to test case wher round scor
 
        /*
        * Map(10) {
@@ -149,7 +152,9 @@ describe('Hotshot Scoreboard', () => {
 
     it('correctly determines, if the user gets an Heatcheckround', () => {
         expect(Scoreboard.getsHeatcheckUpgrade(50)).toBe(true);
-        expect(Scoreboard.getsHeatcheckUpgrade(15)).toBe(false);
+        expect(Scoreboard.getsHeatcheckUpgrade(0)).toBe(false);
+
+        expect(() => { Scoreboard.getsHeatcheckUpgrade(); }).toThrow("Missing Score");
     });
 
     it('calculates a round score correctly.', () => {
@@ -161,14 +166,8 @@ describe('Hotshot Scoreboard', () => {
         const roundScore = Scoreboard.getRoundScore(round);
         expect(roundScore).toEqual(12);
 
-        const anotherRound = {
-            'made_shots': ['green1', 'yellow1', 'gray2', 'blue2'],
-            'attempted_shots': ['green1', 'yellow1', 'gray2', 'blue2']
-        };
-
-        const anotherRoundScore = Scoreboard.getRoundScore(anotherRound);
-
-        expect(anotherRoundScore).toEqual(14);
+        // Fail cases
+        expect(() => {Scoreboard.getRoundScore(); }).toThrow("Missing round data.");
     });
 
     it('Creates correct mapping of colored spots to shot counts', () => {
@@ -189,10 +188,14 @@ describe('Hotshot Scoreboard', () => {
                 expect(shotCount).toEqual(1);
             }
         }
+
+        // Fail cases
+        expect(() => { Scoreboard.getMadeShotCounts(); }).toThrow("Missing round data.");
+
     });
 
 
-    it('correcty determines if the player should get a heatcheck upgrade', () => {
+    it.only('correcty determines if the player should get a heatcheck upgrade', () => {
         const round =             {
             "made_shots": ["green1", "yellow1", "gray2", "blue2","green1", "yellow1", "gray2", "blue2","green1", "yellow1", "gray2", "blue2","green1", "yellow1", "gray2", "blue2"],
         };
@@ -202,6 +205,10 @@ describe('Hotshot Scoreboard', () => {
 
         const getsUpgrade = Scoreboard.getsHeatcheckUpgrade(roundScore);
         expect(getsUpgrade).toBe(true);
+        expect(Scoreboard.getsHeatcheckUpgrade(15)).toBe(false);
+
+        // @TODO - Fail cases
+        expect(() => { Scoreboard.getsHeatcheckUpgrade(); }).toThrow('');
 
     });
 

@@ -11,14 +11,26 @@ const _SCORING = {
 };
 
 const determineMissedShots = (madeShots, attemptedShots) => {
+    if (!madeShots || !attemptedShots) {
+        throw new Error("Missing shot data");
+    };
+
     return attemptedShots.filter(shot => !madeShots.includes(shot));
 }
 
 const getsHeatcheckUpgrade = (roundScore) => {
+    if (typeof roundScore === 'undefined') {
+        throw new Error('Missing Score');
+    }
+
     return roundScore > 30;
 }
 
 const redShots = (missedShots, madeShots) => {
+    if (!missedShots || !madeShots) {
+        throw new Error("Missing shot data");
+    };
+
     let missedRedShots = 0;
     let madeRedShots = 0;
     let deductScore = 0;
@@ -44,6 +56,10 @@ const redShots = (missedShots, madeShots) => {
 }
 
 const getRoundScore = (round) => {
+    if (!round) {
+        throw new Error('Missing round data.');
+    }
+
     let madeShotScore = 0;
     const madeShots = round.made_shots;
 
@@ -59,6 +75,10 @@ const getRoundScore = (round) => {
 }
 
 const getMadeShotCounts = (round) => {
+    if (!round) {
+        throw new Error('Missing round data.');
+    }
+
     const madeShotCounts = new Map();
 
     round.made_shots.forEach(shot => {
@@ -87,10 +107,13 @@ const createDescriptiveRoundMap = (rounds, descriptiveRoundMap) => {
 
         // Handle heatcheck bonus round
 
-        // @ToConsider -
+        // @NOTE -
         // It is possible that a player earns both a heatcheck upgrade and a GOAT upgrade.
         // The sample API payload shows one entry "made_bonus_shots" - It doesn't seem possible to decipher
-        // if the shot should count as a Heatcheck shot (3x points) or a GOAT check shot.
+        // if the shot should count as a Heatcheck shot (3x points) or a GOAT check shot. But since they are exclusive, I
+        // am making a determination to just count `made_bonus_shots` as representing both. This is something I would clarify
+        // before putting into production.
+
 
         const heatcheckUpgrade = getsHeatcheckUpgrade(roundScore);
 
@@ -136,7 +159,7 @@ const createDescriptiveRoundMap = (rounds, descriptiveRoundMap) => {
             "allMissedShots": allMissedShots
         });
     });
-    console.log(descriptiveRoundMap);
+    // console.log(descriptiveRoundMap);
     return descriptiveRoundMap;
 };
 
