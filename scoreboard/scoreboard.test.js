@@ -2,7 +2,7 @@ const testGameData = require('./FakeHotshotData.json');
 const Scoreboard = require("./scoreboard");
 
 describe('Hotshot Scoreboard', () => {
-    it('correctly counts all missed shots', () => {
+    it('Correctly counts all missed shots.', () => {
         const round = {
             'made_shots': ['green1', 'yellow1', 'gray2', 'blue1'],
             'attempted_shots': ['green1', 'yellow1', 'gray2', 'blue1', 'red2']
@@ -17,7 +17,7 @@ describe('Hotshot Scoreboard', () => {
         expect(() => { Scoreboard.determineMissedShots(); }).toThrow("Missing shot data");
     });
 
-    it('correctly maps out information about red shots made during a round. ', () => {
+    it('Correctly maps out information about red shots made during a round. ', () => {
         // Test counting is correct 1
         const round = {
             'made_shots': ['green1', 'yellow1', 'gray2', 'blue1'],
@@ -38,7 +38,7 @@ describe('Hotshot Scoreboard', () => {
         expect(() => { Scoreboard.redShots(); }).toThrow("Missing shot data");
     });
 
-    it('correctly creates an object with computed data about each round in a game', () => {
+    it('Correctly creates an object with computed data about each round in a game.', () => {
         const rounds = JSON.parse(JSON.stringify(testGameData)).data;
         const descriptiveRoundMap = new Map();
         const descriptiveGame = Scoreboard.createDescriptiveRoundMap(rounds, descriptiveRoundMap); // Should probably mock this out
@@ -59,16 +59,20 @@ describe('Hotshot Scoreboard', () => {
 
         const roundEight = descriptiveGame.get(8);
         expect(roundEight.roundScore).toEqual(10);
+
+        // Fail cases.
+        expect(() => { Scoreboard.createDescriptiveRoundMap(rounds); }).toThrow("");
+        expect(() => { Scoreboard.createDescriptiveRoundMap(); }).toThrow("");
     });
 
-    it('correctly determines, if the user gets an Heatcheckround', () => {
+    it('Correctly determines, if the user gets an Heatcheckround.', () => {
         expect(Scoreboard.getsHeatcheckUpgrade(50)).toBe(true);
         expect(Scoreboard.getsHeatcheckUpgrade(0)).toBe(false);
 
         expect(() => { Scoreboard.getsHeatcheckUpgrade(); }).toThrow("Missing Score");
     });
 
-    it('calculates a round score correctly.', () => {
+    it('Calculates a round score correctly.', () => {
         const round = {
             'made_shots':  ['green1', 'yellow1', 'blue2', 'red1', 'blue2', 'gray2', 'gray1', 'red2', 'blue1'], // 5 + 4 + 2 + 1 + 2 +  3 + 3 + 1 + 2 == 23
             'attempted_shots':  ['green1', 'yellow1', 'blue2', 'red1', 'blue2', 'gray2', 'gray1', 'red2', 'blue1'],
@@ -89,7 +93,7 @@ describe('Hotshot Scoreboard', () => {
         expect(() => {Scoreboard.getRoundScore(); }).toThrow("Missing round data.");
     });
 
-    it('Creates correct mapping of colored spots to shot counts', () => {
+    it('Creates correct mapping of colored spots to shot counts.', () => {
         const round = {
             'made_shots': ['green1', 'yellow1', 'blue2', 'red2'],
             'attempted_shots': ['green1', 'yellow1', 'blue2', 'red2']
@@ -112,7 +116,7 @@ describe('Hotshot Scoreboard', () => {
 
     });
 
-    it('correcty determines if the player should get a heatcheck upgrade', () => {
+    it('Correcty determines if the player should get a heatcheck upgrade.', () => {
         const round =             {
             "made_shots": ["green1", "yellow1", "gray2", "blue2","green1", "yellow1", "gray2", "blue2","green1", "yellow1", "gray2", "blue2","green1", "yellow1", "gray2", "blue2"],
             "attempted_shots": []
@@ -125,7 +129,7 @@ describe('Hotshot Scoreboard', () => {
         expect(getsUpgrade).toBe(true);
         expect(Scoreboard.getsHeatcheckUpgrade(15)).toBe(false);
 
-        // @TODO - Fail cases
+        // Fail cases
         expect(() => { Scoreboard.getsHeatcheckUpgrade(); }).toThrow('');
     });
 
@@ -150,7 +154,7 @@ describe('Hotshot Scoreboard', () => {
         expect(() => { Scoreboard.getHeatcheckScore(null, round); }).toThrow('');
     });
 
-    it('correcty determines if the player should get a GOAT upgrade', () => {
+    it('Correcty determines if the player should get a GOAT upgrade.', () => {
         const goodRound = {
             'made_shots': ['green1', 'yellow1', 'blue2', 'red1', 'blue2', 'gray2', 'gray1', 'red2', 'blue1'],
         }
@@ -163,7 +167,7 @@ describe('Hotshot Scoreboard', () => {
 
         expect(Scoreboard.getsGOATUpgrade(badRound)).toBe(false);
 
-        // @TODO - Fail cases
+        // Fail cases
         const failRound = {
             'attempted_shots': ['green1'],
         }
@@ -180,13 +184,20 @@ describe('Hotshot Scoreboard', () => {
         };
 
         expect(Scoreboard.getRoundScore(round)).toBe(23);
+
+        // Round 1-9 test
         expect(Scoreboard.getGOATScore(2, round)).toBe(12);
+
+        // Round 10 test
         expect(Scoreboard.getGOATScore(10, round)).toBe(12);
     });
 
-    it("Corretly creates the scoreboard array", () => {
+    it("Corretly creates the scoreboard array.", () => {
         const scoreboard = Scoreboard.createScoreboard(testGameData);
         expect(scoreboard).toEqual([9, 21, 56, 68, 75, 75, 90, 100, 114, 129]);
+
+        // Fail cases
+        expect(() => { Scoreboard.createScoreboard(); }).toThrow('No game data.');
     });
 
   });

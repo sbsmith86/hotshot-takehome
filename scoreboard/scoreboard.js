@@ -182,8 +182,11 @@ const getGOATScore = (currentRound, roundData) => {
 }
 
 const createDescriptiveRoundMap = (rounds, descriptiveRoundMap) => {
+    if (!rounds || !descriptiveRoundMap) {
+        throw new Error('Error getting descriptive round map: Missing round data.');
+    }
+
     let cumalativeScore = 0;
-    // console.log("createDescriptiveRoundMap");
 
     rounds.forEach((round, index) => {
         const currentRound = index + 1;
@@ -231,13 +234,16 @@ const createDescriptiveRoundMap = (rounds, descriptiveRoundMap) => {
 };
 
 const createScoreboard = (fakeData) => {
+    if (!fakeData) {
+        throw new Error('No game data.');
+    }
+
     const rounds = JSON.parse(JSON.stringify(fakeData)).data;
 
     const descriptiveRoundMap = new Map();
     let scoreboard = [];
 
     createDescriptiveRoundMap(rounds, descriptiveRoundMap);
-    // console.log(descriptiveRoundMap);
 
     descriptiveRoundMap.forEach((value, key) => {
         scoreboard.push(value.cumalativeScore);
