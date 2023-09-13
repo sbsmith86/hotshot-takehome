@@ -194,8 +194,7 @@ describe('Hotshot Scoreboard', () => {
 
     });
 
-
-    it.only('correcty determines if the player should get a heatcheck upgrade', () => {
+    it('correcty determines if the player should get a heatcheck upgrade', () => {
         const round =             {
             "made_shots": ["green1", "yellow1", "gray2", "blue2","green1", "yellow1", "gray2", "blue2","green1", "yellow1", "gray2", "blue2","green1", "yellow1", "gray2", "blue2"],
         };
@@ -209,7 +208,54 @@ describe('Hotshot Scoreboard', () => {
 
         // @TODO - Fail cases
         expect(() => { Scoreboard.getsHeatcheckUpgrade(); }).toThrow('');
+    });
 
+    it('Correctly calculates heatcheck score.', () => {
+        const round = {
+            'made_shots': ['green1', 'yellow1', 'blue2', 'red1', 'blue2', 'gray2', 'gray1', 'red2', 'blue1'],
+            'attempted_shots':  ['green1', 'yellow1', 'blue2', 'red1', 'blue2', 'gray2', 'gray1', 'red2', 'blue1'],
+            'made_bonus_shots': ['green1', 'yellow1', 'gray2'] // 10, 8, 6
+        };
+
+        // Test when in Round 1-9
+        const heatcheckScore1 = Scoreboard.getHeatcheckScore(2, round);
+        expect(heatcheckScore1).toEqual(36);
+
+        // Test when in round 10
+        const heatcheckScore2 = Scoreboard.getHeatcheckScore(10, round);
+        expect(heatcheckScore2).toEqual(24);
+
+        // Fail cases
+        expect(() => { Scoreboard.getHeatcheckScore(); }).toThrow('');
+        expect(() => { Scoreboard.getHeatcheckScore(2); }).toThrow('');
+        expect(() => { Scoreboard.getHeatcheckScore(null, round); }).toThrow('');
+    });
+
+    it('correcty determines if the player should get a GOAT upgrade', () => {
+        const goodRound = {
+            'made_shots': ['green1', 'yellow1', 'blue2', 'red1', 'blue2', 'gray2', 'gray1', 'red2', 'blue1'],
+        }
+
+        expect(Scoreboard.getsGOATUpgrade(goodRound)).toBe(true);
+
+        const badRound = {
+            'made_shots': ['green1'],
+        }
+
+        expect(Scoreboard.getsGOATUpgrade(badRound)).toBe(false);
+
+        // @TODO - Fail cases
+        const failRound = {
+            'attempted_shots': ['green1'],
+        }
+        expect(() => { Scoreboard.getsGOATUpgrade(); }).toThrow('Missing round data.');
+        expect(() => { Scoreboard.getsGOATUpgrade(failRound); }).toThrow('Missing round data.');
+        expect(() => { Scoreboard.getsGOATUpgrade(2); }).toThrow('Missing round data.');
+    });
+
+    it('Correctly calculates GOAT score.', () => {
+
+        //fill in
     });
 
   });

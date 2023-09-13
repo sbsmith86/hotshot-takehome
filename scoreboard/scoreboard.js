@@ -26,6 +26,18 @@ const getsHeatcheckUpgrade = (roundScore) => {
     return roundScore > 30;
 }
 
+const getsGOATUpgrade = (round) => {
+    if (!round || !round.made_shots) {
+        throw new Error('Missing round data.');
+    }
+
+    const allSpots = ['green1', 'yellow1', 'gray2', 'gray1', 'blue1', 'blue2', 'red1', 'red2',  'red2'];
+
+    const allSpotsMade = allSpots.every(spot => round.made_shots.includes(spot));
+
+    return allSpotsMade;
+}
+
 const redShots = (missedShots, madeShots) => {
     if (!missedShots || !madeShots) {
         throw new Error("Missing shot data");
@@ -91,6 +103,51 @@ const getMadeShotCounts = (round) => {
     return madeShotCounts;
 };
 
+const getHeatcheckScore = (currentRound, roundData) => {
+    // @Note - for a production application, I would do more strict type checking.
+    if (!roundData || !currentRound) {
+        throw new Error('Error getting heatcheck round score: Missing round data.');
+    }
+
+    const roundScore = getRoundScore(roundData);
+    let heatcheckBonusScore = 0;
+    const numBonusShots = 3;
+    const madeBonusShots = roundData.made_bonus_shots;
+
+    if (madeBonusShots && madeBonusShots.length !== 0) {
+        if (currentRound !== 10) {
+            for (let i = 0; i < numBonusShots; i++) {
+                const bonusShot = madeBonusShots[i];
+                const spotNumber = bonusShot.slice(-1);
+                const spotColor = bonusShot.substring(0, bonusShot.indexOf(spotNumber));
+                const pointsForShot = _SCORING[spotColor] * 3;
+
+                heatcheckBonusScore = heatcheckBonusScore + pointsForShot
+            }
+        } else {
+            for (let i = 0; i < madeBonusShots.length; i++) {
+                const bonusShot = madeBonusShots[i];
+                const spotNumber = bonusShot.slice(-1);
+                const spotColor = bonusShot.substring(0, bonusShot.indexOf(spotNumber));
+                const pointsForShot = _SCORING[spotColor] * 2;
+
+                heatcheckBonusScore = heatcheckBonusScore + pointsForShot
+            }
+        }
+    }
+
+    return heatcheckBonusScore;
+
+}
+
+const getGOATScore = (currentRound, roundData) => {
+    if (!roundData || !currentRound) {
+        throw new Error('Error getting heatcheck round score: Missing round data.');
+    }
+
+    return "getGOATScore";
+}
+
 const createDescriptiveRoundMap = (rounds, descriptiveRoundMap) => {
     let cumalativeScore = 0;
 
@@ -115,34 +172,15 @@ const createDescriptiveRoundMap = (rounds, descriptiveRoundMap) => {
         // before putting into production.
 
 
-        const heatcheckUpgrade = getsHeatcheckUpgrade(roundScore);
-
-        if (heatcheckUpgrade) {
-            const numBonusShots = 3;
-            const madeBonusShots = round.made_bonus_shots;
-
-            if (madeBonusShots && madeBonusShots.length !== 0) {
-                if (currentRound !== 10) {
-                    for (let i = 0; i < numBonusShots; i++) {
-                        const bonusShot = madeBonusShots[i];
-                        const spotNumber = bonusShot.slice(-1);
-                        const spotColor = bonusShot.substring(0, bonusShot.indexOf(spotNumber));
-                        const pointsForShot = _SCORING[spotColor] * 3;
-
-                        cumalativeScore = cumalativeScore + pointsForShot
-                    }
-                } else {
-                    for (let i = 0; i < madeBonusShots.length; i++) {
-                        const bonusShot = madeBonusShots[i];
-                        const spotNumber = bonusShot.slice(-1);
-                        const spotColor = bonusShot.substring(0, bonusShot.indexOf(spotNumber));
-                        const pointsForShot = _SCORING[spotColor] * 2;
-
-                        cumalativeScore = cumalativeScore + pointsForShot
-                    }
-                }
-            }
+        // add heatcheck functions here.
+        if (getsHeatcheckUpgrade(roundScore)) {
+            const heatcheckScore = getHeatcheckScore(currentRound, round);
         }
+
+        if (getsGOATUpgrade(round)) {
+            const goatScore = getGOATScore(currentRound, round);
+        }
+
 
         // Void round points at the end if the user made more than 1 layup.
         // @note - this could probably be done sooner to avoid all the calculating we have to do.
@@ -180,4 +218,6 @@ module.exports = {
     getsHeatcheckUpgrade,
     getRoundScore,
     getMadeShotCounts,
+    getHeatcheckScore,
+    getsGOATUpgrade
 };
