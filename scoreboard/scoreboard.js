@@ -1,7 +1,3 @@
-
-const data = require('./FakeHotshotData.json');
-const fs = require('fs');
-
 const _SCORING = {
     "green" : 5,
     "yellow": 4,
@@ -79,11 +75,18 @@ const getRoundScore = (round) => {
         round.made_shots.forEach(shot => {
             const spotNumber = shot.slice(-1);
             const spotColor = shot.substring(0, shot.indexOf(spotNumber));
+
             madeShotScore = madeShotScore + _SCORING[spotColor];
         });
     }
 
-    return madeShotScore;
+    const allMissedShots = determineMissedShots(round.made_shots, round.attempted_shots);
+
+    const roundRedShots = redShots(allMissedShots, round.made_shots);
+
+    // Scoreboard.redShots(, round.made_shots);
+
+    return madeShotScore - roundRedShots.deduct;
 }
 
 const getMadeShotCounts = (round) => {
@@ -109,7 +112,6 @@ const getHeatcheckScore = (currentRound, roundData) => {
         throw new Error('Error getting heatcheck round score: Missing round data.');
     }
 
-    const roundScore = getRoundScore(roundData);
     let heatcheckBonusScore = 0;
     const numBonusShots = 3;
     const madeBonusShots = roundData.made_bonus_shots;
@@ -142,14 +144,46 @@ const getHeatcheckScore = (currentRound, roundData) => {
 
 const getGOATScore = (currentRound, roundData) => {
     if (!roundData || !currentRound) {
-        throw new Error('Error getting heatcheck round score: Missing round data.');
+        throw new Error('Error getting GOAT round score: Missing round data.');
     }
 
-    return "getGOATScore";
+    let GOATscore = 0;
+
+    const madeBonusShots = roundData.made_bonus_shots;
+
+    if (madeBonusShots && madeBonusShots.length !== 0) {
+        if (currentRound !== 10) {
+            for (let i = 0; i < 4; i++) {
+                const bonusShot = madeBonusShots[i];
+
+                if (bonusShot) {
+                    const spotNumber = bonusShot.slice(-1);
+                    const spotColor = bonusShot.substring(0, bonusShot.indexOf(spotNumber));
+
+                    GOATscore = GOATscore + _SCORING[spotColor];
+                }
+            }
+        } else {
+            // Confirm you only take into consideration one shot per spot. so no dupes in `made_bonus_shots`
+            const noDupes = madeBonusShots.filter((shot, index) => madeBonusShots.indexOf(shot) === index);
+            if (noDupes.length <= 8) {
+                for (let i = 0; i < noDupes.length; i++) {
+                    const bonusShot = noDupes[i]
+                    const spotNumber = bonusShot.slice(-1);
+                    const spotColor = bonusShot.substring(0, bonusShot.indexOf(spotNumber));
+
+                    GOATscore = GOATscore + _SCORING[spotColor];
+                }
+            }
+        }
+    }
+
+    return GOATscore;
 }
 
 const createDescriptiveRoundMap = (rounds, descriptiveRoundMap) => {
     let cumalativeScore = 0;
+    // console.log("createDescriptiveRoundMap");
 
     rounds.forEach((round, index) => {
         const currentRound = index + 1;
@@ -160,9 +194,6 @@ const createDescriptiveRoundMap = (rounds, descriptiveRoundMap) => {
         const redShotCounts = redShots(allMissedShots, round.made_shots);
         const madeShotCountsByColor = getMadeShotCounts(round);
         let roundScore = getRoundScore(round);
-        cumalativeScore = cumalativeScore + roundScore - redShotCounts.deduct;
-
-        // Handle heatcheck bonus round
 
         // @NOTE -
         // It is possible that a player earns both a heatcheck upgrade and a GOAT upgrade.
@@ -171,43 +202,48 @@ const createDescriptiveRoundMap = (rounds, descriptiveRoundMap) => {
         // am making a determination to just count `made_bonus_shots` as representing both. This is something I would clarify
         // before putting into production.
 
-
-        // add heatcheck functions here.
-        if (getsHeatcheckUpgrade(roundScore)) {
-            const heatcheckScore = getHeatcheckScore(currentRound, round);
-        }
-
-        if (getsGOATUpgrade(round)) {
-            const goatScore = getGOATScore(currentRound, round);
-        }
+        // Handle bonus rounds
+        const heatcheckScore = getsHeatcheckUpgrade(roundScore) ? getHeatcheckScore(currentRound, round) : 0;
+        const goatScore = getsGOATUpgrade(round) ? getGOATScore(currentRound, round) : 0;
 
 
         // Void round points at the end if the user made more than 1 layup.
         // @note - this could probably be done sooner to avoid all the calculating we have to do.
         if (redShotCounts.madeRedShots > 2) {
             roundScore = 0;
-            cumalativeScore = cumalativeScore + roundScore;
         }
+
+        const bonusScore = heatcheckScore + goatScore;
+
+        cumalativeScore = cumalativeScore + roundScore + bonusScore;
 
         descriptiveRoundMap.set(currentRound, {
             "totalRoundShots": totalRoundShots,
             "madeShotCountsByColor" : madeShotCountsByColor,
             "roundScore": roundScore,
+            "bonusScore": bonusScore,
             "cumalativeScore": cumalativeScore,
             "allMissedShots": allMissedShots
         });
     });
-    // console.log(descriptiveRoundMap);
+
     return descriptiveRoundMap;
 };
 
-const createScoreboard = () => {
-    const fakeGameData = data;
-    const rounds = JSON.parse(JSON.stringify(fakeGameData)).data;
+const createScoreboard = (fakeData) => {
+    const rounds = JSON.parse(JSON.stringify(fakeData)).data;
 
     const descriptiveRoundMap = new Map();
+    let scoreboard = [];
+
     createDescriptiveRoundMap(rounds, descriptiveRoundMap);
-    return descriptiveRoundMap;
+    // console.log(descriptiveRoundMap);
+
+    descriptiveRoundMap.forEach((value, key) => {
+        scoreboard.push(value.cumalativeScore);
+    });
+
+    return scoreboard;
 }
 
 module.exports = {
@@ -219,5 +255,6 @@ module.exports = {
     getRoundScore,
     getMadeShotCounts,
     getHeatcheckScore,
-    getsGOATUpgrade
+    getsGOATUpgrade,
+    getGOATScore
 };

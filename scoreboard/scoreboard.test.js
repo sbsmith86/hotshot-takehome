@@ -1,3 +1,4 @@
+const testGameData = require('./FakeHotshotData.json');
 const Scoreboard = require("./scoreboard");
 
 describe('Hotshot Scoreboard', () => {
@@ -38,116 +39,26 @@ describe('Hotshot Scoreboard', () => {
     });
 
     it('correctly creates an object with computed data about each round in a game', () => {
-        const descriptiveGame = Scoreboard.createScoreboard(); // Should probably mock this out
+        const rounds = JSON.parse(JSON.stringify(testGameData)).data;
+        const descriptiveRoundMap = new Map();
+        const descriptiveGame = Scoreboard.createDescriptiveRoundMap(rounds, descriptiveRoundMap); // Should probably mock this out
         const madeShotCountsByColorMap = new Map();
         madeShotCountsByColorMap.set('green', 1);
         madeShotCountsByColorMap.set('yellow', 1);
         madeShotCountsByColorMap.set('blue', 3);
         madeShotCountsByColorMap.set('red', 2);
         madeShotCountsByColorMap.set('gray', 2);
-       // Check that it mapped a single round correctly.
+
+        // Check that it mapped a single round correctly.
         const roundThree = descriptiveGame.get(3);
-        // console.log(roundThree);
         expect(roundThree.totalRoundShots).toEqual(9);
         expect(roundThree.madeShotCountsByColor).toEqual(madeShotCountsByColorMap);
         expect(roundThree.roundScore).toEqual(23);
-        expect(roundThree.cumalativeScore).toEqual(44); // TO BE UPDATED
+        expect(roundThree.cumalativeScore).toEqual(56);
         expect(roundThree.allMissedShots.length).toEqual(0);
-        // Need to test case wher round scor
 
-       /*
-       * Map(10) {
-      1 => {
-        totalRoundShots: 4,
-        madeShotCountsByColor: Map(3) { 'green' => 1, 'gray' => 1, 'red' => 1 },
-        madeShotScore: 9,
-        cumalativeScore: 9,
-        allMissedShots: [ 'blue2' ]
-      },
-      2 => {
-        totalRoundShots: 5,
-        madeShotCountsByColor: Map(4) { 'green' => 1, 'yellow' => 1, 'gray' => 1, 'blue' => 1 },
-        madeShotScore: 14,
-        cumalativeScore: 21,
-        allMissedShots: [ 'red2' ]
-      },
-      3 => {
-        totalRoundShots: 9,
-        madeShotCountsByColor: Map(5) {
-          'green' => 1,
-          'yellow' => 1,
-          'blue' => 3,
-          'red' => 2,
-          'gray' => 2
-        },
-        madeShotScore: 23,
-        cumalativeScore: 44,
-        allMissedShots: []
-      },
-      4 => {
-        totalRoundShots: 4,
-        madeShotCountsByColor: Map(4) { 'green' => 1, 'yellow' => 1, 'blue' => 1, 'red' => 1 },
-        madeShotScore: 12,
-        cumalativeScore: 56,
-        allMissedShots: []
-      },
-      5 => {
-        totalRoundShots: 5,
-        madeShotCountsByColor: Map(2) { 'green' => 1, 'yellow' => 1 },
-        madeShotScore: 9,
-        cumalativeScore: 63,
-        allMissedShots: [ 'gray2', 'blue2', 'red2' ]
-      },
-      6 => {
-        totalRoundShots: 6,
-        madeShotCountsByColor: Map(3) { 'red' => 3, 'green' => 1, 'blue' => 1 },
-        madeShotScore: 10,
-        cumalativeScore: 63,
-        allMissedShots: []
-      },
-      7 => {
-        totalRoundShots: 5,
-        madeShotCountsByColor: Map(5) {
-          'green' => 1,
-          'yellow' => 1,
-          'gray' => 1,
-          'blue' => 1,
-          'red' => 1
-        },
-        madeShotScore: 15,
-        cumalativeScore: 78,
-        allMissedShots: []
-      },
-      8 => {
-        totalRoundShots: 5,
-        madeShotCountsByColor: Map(3) { 'green' => 1, 'yellow' => 1, 'gray' => 1 },
-        madeShotScore: 12,
-        cumalativeScore: 88,
-        allMissedShots: [ 'blue1', 'red2' ]
-      },
-      9 => {
-        totalRoundShots: 4,
-        madeShotCountsByColor: Map(4) { 'green' => 1, 'yellow' => 1, 'gray' => 1, 'blue' => 1 },
-        madeShotScore: 14,
-        cumalativeScore: 102,
-        allMissedShots: []
-      },
-      10 => {
-        totalRoundShots: 5,
-        madeShotCountsByColor: Map(5) {
-          'green' => 1,
-          'yellow' => 1,
-          'gray' => 1,
-          'blue' => 1,
-          'red' => 1
-        },
-        madeShotScore: 15,
-        cumalativeScore: 117,
-        allMissedShots: []
-      }
-    }
-
-       */
+        const roundEight = descriptiveGame.get(8);
+        expect(roundEight.roundScore).toEqual(10);
     });
 
     it('correctly determines, if the user gets an Heatcheckround', () => {
@@ -159,13 +70,21 @@ describe('Hotshot Scoreboard', () => {
 
     it('calculates a round score correctly.', () => {
         const round = {
-            'made_shots': ['green1', 'yellow1', 'blue2', 'red2'],
-            'attempted_shots': ['green1', 'yellow1', 'blue2', 'red2']
+            'made_shots':  ['green1', 'yellow1', 'blue2', 'red1', 'blue2', 'gray2', 'gray1', 'red2', 'blue1'], // 5 + 4 + 2 + 1 + 2 +  3 + 3 + 1 + 2 == 23
+            'attempted_shots':  ['green1', 'yellow1', 'blue2', 'red1', 'blue2', 'gray2', 'gray1', 'red2', 'blue1'],
+            'made_bonus_shots': ['green1', 'yellow1', 'gray2']
         };
 
         const roundScore = Scoreboard.getRoundScore(round);
-        expect(roundScore).toEqual(12);
+        expect(roundScore).toEqual(23);
 
+        const roundEight = {
+            'made_shots': ['green1', 'yellow1', 'gray2'],
+            'attempted_shots': ['green1', 'yellow1', 'gray2', 'blue1', 'red2']
+        };
+
+        const roundEightScore = Scoreboard.getRoundScore(roundEight);
+        expect(roundEightScore).toEqual(10);
         // Fail cases
         expect(() => {Scoreboard.getRoundScore(); }).toThrow("Missing round data.");
     });
@@ -176,10 +95,9 @@ describe('Hotshot Scoreboard', () => {
             'attempted_shots': ['green1', 'yellow1', 'blue2', 'red2']
         };
 
-        const allowedColors = ["green", 'yellow', 'blue', 'red'];
+        const allowedColors = ["green", 'yellow', 'gray', 'blue', 'red'];
 
         const madeShotCountsByColor = Scoreboard.getMadeShotCounts(round);
-
         expect(madeShotCountsByColor.size).toEqual(4);
 
         for (let [color, shotCount] of madeShotCountsByColor) {
@@ -197,6 +115,7 @@ describe('Hotshot Scoreboard', () => {
     it('correcty determines if the player should get a heatcheck upgrade', () => {
         const round =             {
             "made_shots": ["green1", "yellow1", "gray2", "blue2","green1", "yellow1", "gray2", "blue2","green1", "yellow1", "gray2", "blue2","green1", "yellow1", "gray2", "blue2"],
+            "attempted_shots": []
         };
 
         const roundScore = Scoreboard.getRoundScore(round);
@@ -254,8 +173,20 @@ describe('Hotshot Scoreboard', () => {
     });
 
     it('Correctly calculates GOAT score.', () => {
+        const round = {
+            'made_shots': ['green1', 'yellow1', 'blue2', 'red1', 'blue2', 'gray2', 'gray1','red2', 'blue1'],
+            'attempted_shots':  ['green1', 'yellow1', 'blue2', 'red1', 'blue2', 'gray2', 'gray1', 'red2', 'blue1'],
+            'made_bonus_shots': ['green1', 'yellow1', 'gray2'] // 5,4,3 = 12
+        };
 
-        //fill in
+        expect(Scoreboard.getRoundScore(round)).toBe(23);
+        expect(Scoreboard.getGOATScore(2, round)).toBe(12);
+        expect(Scoreboard.getGOATScore(10, round)).toBe(12);
+    });
+
+    it("Corretly creates the scoreboard array", () => {
+        const scoreboard = Scoreboard.createScoreboard(testGameData);
+        expect(scoreboard).toEqual([9, 21, 56, 68, 75, 75, 90, 100, 114, 129]);
     });
 
   });
